@@ -43,8 +43,10 @@ use OCP\Mail\IMessage;
 use OCP\Notification\IManager as INotificationManager;
 use OCP\Notification\INotification;
 use Psr\Log\LoggerInterface;
+use OCP\IL10N;
 
-class BackgroundJob extends QueuedJob {
+class BackgroundJob extends QueuedJob
+{
 	/** @var IConfig */
 	protected $config;
 
@@ -74,6 +76,7 @@ class BackgroundJob extends QueuedJob {
 
 	/** @var bool */
 	protected $enabledForGuestsUsers;
+	protected IL10N $l;
 
 	public function __construct(
 		IConfig $config,
@@ -84,7 +87,9 @@ class BackgroundJob extends QueuedJob {
 		INotificationManager $notificationManager,
 		IMailer $mailer,
 		LoggerInterface $logger,
-		Manager $manager) {
+		Manager $manager,
+		IL10N $l
+	) {
 		parent::__construct($time);
 		$this->config = $config;
 		$this->userManager = $userManager;
@@ -94,12 +99,14 @@ class BackgroundJob extends QueuedJob {
 		$this->mailer = $mailer;
 		$this->logger = $logger;
 		$this->manager = $manager;
+		$this->l = $l;
 	}
 
 	/**
 	 * @param array $argument
 	 */
-	public function run($argument): void {
+	public function run($argument): void
+	{
 		try {
 			$announcement = $this->manager->getAnnouncement($argument['id'], true);
 		} catch (AnnouncementDoesNotExistException $e) {
@@ -110,7 +117,7 @@ class BackgroundJob extends QueuedJob {
 
 		$guestsWhiteList = $this->config->getAppValue('guests', 'whitelist');
 		$this->enabledForGuestsUsers = strpos($guestsWhiteList, 'announcementcenter') !== false;
-
+		$this->logger->warning("background:" . json_encode($argument));
 		$this->createPublicity($announcement, $argument);
 	}
 
@@ -118,7 +125,8 @@ class BackgroundJob extends QueuedJob {
 	 * @param Announcement $announcement
 	 * @param array $publicity
 	 */
-	protected function createPublicity(Announcement $announcement, array $publicity): void {
+	protected function createPublicity(Announcement $announcement, array $publicity): void
+	{
 		$event = $this->activityManager->generateEvent();
 		$event->setApp('announcementcenter')
 			->setType('announcementcenter')
@@ -147,12 +155,12 @@ class BackgroundJob extends QueuedJob {
 		$email->useTemplate($template);
 
 		$groups = $this->manager->getGroups($announcement);
-		if (\in_array('everyone', $groups, true)) {
-			$this->createPublicityEveryone($announcement->getUser(), $event, $notification, $email, $publicity);
-		} else {
-			$this->notifiedUsers = [];
-			$this->createPublicityGroups($announcement->getUser(), $event, $notification, $email, $groups, $publicity);
-		}
+		// if (\in_array('everyone', $groups, true)) {
+		// 	$this->createPublicityEveryone($announcement->getUser(), $event, $notification, $email, $publicity);
+		// } else {
+		$this->notifiedUsers = [];
+		$this->createPublicityGroups($announcement->getUser(), $event, $notification, $email, $groups, $publicity);
+		// }
 	}
 
 	/**
@@ -163,7 +171,8 @@ class BackgroundJob extends QueuedJob {
 	 *
 	 * @return void
 	 */
-	protected function setMailBody(IEMailTemplate $template, string $message): void {
+	protected function setMailBody(IEMailTemplate $template, string $message): void
+	{
 		$lines = explode("\n", $message);
 
 		foreach ($lines as $line) {
@@ -185,7 +194,8 @@ class BackgroundJob extends QueuedJob {
 	 * @param INotification $notification
 	 * @param array $publicity
 	 */
-	protected function createPublicityEveryone(string $authorId, IEvent $event, INotification $notification, IMessage $email, array $publicity): void {
+	protected function createPublicityEveryone(string $authorId, IEvent $event, INotification $notification, IMessage $email, array $publicity): void
+	{
 		$this->userManager->callForSeenUsers(function (IUser $user) use ($authorId, $event, $notification, $email, $publicity) {
 			if (!$this->enabledForGuestsUsers && $user->getBackend() instanceof UserBackend) {
 				return;
@@ -223,7 +233,8 @@ class BackgroundJob extends QueuedJob {
 	 * @param string[] $groups
 	 * @param array $publicity
 	 */
-	protected function createPublicityGroups(string $authorId, IEvent $event, INotification $notification, IMessage $email, array $groups, array $publicity): void {
+	protected function createPublicityGroups(string $authorId, IEvent $event, INotification $notification, IMessage $email, array $groups, array $publicity): void
+	{
 		foreach ($groups as $gid) {
 			$group = $this->groupManager->get($gid);
 			if (!($group instanceof IGroup)) {

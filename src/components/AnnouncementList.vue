@@ -187,6 +187,7 @@ export default {
 			return res;
 		},
 		groupedAnnouncements() {
+			console.log(this.sortAnnouncements);
 			// 定义一个空对象，用于存储分组结果
 			let result = {};
 			// 定义一个数组，用于存储分组的键
@@ -309,7 +310,6 @@ export default {
 		...mapMutations(["setCurrentAnnouncementId", "clearAnnoucements"]),
 		...mapActions(["loadAnnouncements"]),
 		toggleCollapse(time) {
-			console.log(time);
 			if (!this.collapseShow[time]) {
 				Object.keys(this.collapseShow).forEach((key) => {
 					this.$set(this.collapseShow, key, false);
@@ -318,7 +318,6 @@ export default {
 			} else {
 				this.$set(this.collapseShow, time, false);
 			}
-			console.log(this.collapseShow);
 		},
 		findAnnoucementTime(id) {
 			let timeKeys = Object.keys(this.groupedAnnouncements);
