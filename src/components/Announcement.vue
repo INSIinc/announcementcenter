@@ -52,7 +52,7 @@
 								class="truncate"
 								style="
 									color: var(--color-text-maxcontrast);
-									width: 60%;
+									width: 50%;
 								">
 								{{ source.message }}
 							</div>

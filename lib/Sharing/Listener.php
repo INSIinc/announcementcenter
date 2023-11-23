@@ -38,16 +38,18 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use OCA\AnnouncementCenter\Model\Attachment;
 use OCA\AnnouncementCenter\Model\AttachmentMapper;
+use OCA\AnnouncementCenter\Service\ConfigService;
 
 class Listener
 {
-
+	private ConfigService $configService;
 	private AttachmentMapper $attachmentMapper;
 	private LoggerInterface $logger;
-	public function __construct(LoggerInterface $logger, AttachmentMapper $attachmentMapper,)
+	public function __construct(LoggerInterface $logger, AttachmentMapper $attachmentMapper, ConfigService $configService)
 	{
 		$this->logger = $logger;
 		$this->attachmentMapper = $attachmentMapper;
+		$this->configService = $configService;
 	}
 
 	public function register(IEventDispatcher $dispatcher): void

@@ -72,7 +72,9 @@
 			</div>
 			<collapse-transition>
 				<div v-show="fileCollapseShow">
-					<ul class="attachment-list grid grid-cols-3 gap-2">
+					<ul
+						class="attachment-list grid grid-cols-3 gap-2"
+						style="height: 55px; overflow-y: auto">
 						<li
 							v-for="attachment in attachments"
 							:key="attachment.id"
@@ -112,7 +114,7 @@
 				</div>
 			</collapse-transition>
 		</div>
-		<div class="rounded mb-2" style="height: 60%">
+		<div class="rounded mb-2" style="height: 55%">
 			<div style="height: 100%; overflow-y: auto" v-if="textAppAvailable">
 				<div ref="editor" />
 			</div>
