@@ -29,7 +29,6 @@ namespace OCA\AnnouncementCenter\Service;
 use OCA\AnnouncementCenter\Model\Attachment;
 use OCA\AnnouncementCenter\Model\AnnouncementMapper;
 use OCA\AnnouncementCenter\Model\GroupMapper;
-use OCA\AnnouncementCenter\Model\Share;
 use OCA\AnnouncementCenter\NoPermissionException;
 use OCA\AnnouncementCenter\Sharing\AnnouncementcenterShareProvider;
 use OCA\AnnouncementCenter\StatusException;
@@ -51,12 +50,9 @@ use OCP\AppFramework\Http\Response;
 
 class FileShareService implements IAttachmentService
 {
-	private IRequest $request;
 	private IRootFolder $rootFolder;
-	private AnnouncementcenterShareProvider $shareProvider;
 	private IManager $shareManager;
 	private ?string $userId;
-
 	private IL10N $l10n;
 	private IPreview $preview;
 	private IMimeTypeDetector $mimeTypeDetector;
@@ -80,11 +76,9 @@ class FileShareService implements IAttachmentService
 		?string $userId,
 		GroupMapper $groupMapper,
 	) {
-		$this->request = $request;
+
 		$this->l10n = $l10n;
 		$this->rootFolder = $rootFolder;
-
-		$this->shareProvider = $shareProvider;
 		$this->shareManager = $shareManager;
 		$this->userId = $userId;
 		$this->preview = $preview;

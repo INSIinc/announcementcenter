@@ -20,101 +20,59 @@
   -
   -->
 <template>
-	<div
-		@click="onClick"
-		class="flex items-center p-2 justify-between announce_item"
-		style="
-			width: 100%;
-			border-bottom: 1px solid var(--color-background-darker);
-		"
-		:class="{ selected_announcement: isSelected }">
-		<div class="flex items-center" style="width: 100%">
-			<NcAvatar
-				:user="source.author_id"
-				:display-name="source.author"
-				:size="40"
-				:show-user-status="true" />
-			<div
-				class="ml-2 flex items-center justify-between"
-				style="width: calc(100% - 40px)">
-				<div class="flex-col" style="width: calc(100% - 50px)">
-					<span class="text-xl">{{ source.author }}</span>
-					<div
-						class="flex text-sm justify-between items-center"
-						style="width: 90%">
-						<div class="flex" style="width: 100%">
-							<div
-								class="font-bold"
-								style="color: var(--color-primary)">
-								{{ source.subject }}
-							</div>
-							<div
-								class="truncate"
-								style="
-									color: var(--color-text-maxcontrast);
-									width: 50%;
-								">
-								{{ source.message }}
-							</div>
-						</div>
-					</div>
-					<div
-						class="text-xs flex justify-between items-center announce_message"
-						style="
-							color: var(--color-text-maxcontrast);
-							width: 90%;
-						">
-						<div
-							class="live-relative-timestamp"
-							style="color: var(--color-text-maxcontrast)"
-							:data-timestamp="timestamp"
-							:title="dateFormat">
-							{{ dateRelative }}
-						</div>
-						<div style="color: var(--color-text-maxcontrast)">
-							{{ commentsCount }}
-						</div>
-					</div>
-				</div>
-				<div class="flex justify-center">
-					<NcActions
-						v-if="isAuthor"
-						:force-menu="true"
-						:boundaries-element="boundariesElement">
-						<NcActionButton
-							v-if="source.notifications"
-							icon="icon-notifications-off"
-							:close-after-click="true"
-							:title="
-								t('announcementcenter', 'Clear notifications')
-							"
-							@click="onRemoveNotifications" />
-						<NcActionButton
-							icon="icon-delete"
-							:title="
-								t('announcementcenter', 'Delete announcement')
-							"
-							@click="onDeleteAnnouncement" />
-					</NcActions>
-				</div>
-			</div>
-		</div>
+	<div>
+		<NcListItem
+			:title="source.subject"
+			:bold="false"
+			:active="isSelected"
+			:details="dateRelative"
+			counterType="outlined"
+			:counterNumber="commentsCount"
+			@click="onClick">
+			<template #icon>
+				<NcAvatar
+					:size="44"
+					:user="source.author_id"
+					:display-name="source.author" />
+			</template>
+			<template #subtitle> {{ source.message }} </template>
+			<template #indicator>
+				<!-- Color dot -->
+				<!-- <CheckboxBlankCircle :size="16" fill-color="#fff" /> -->
+			</template>
+			<template v-if="isAuthor" #actions>
+				<NcActionButton
+					v-if="source.notifications"
+					icon="icon-notifications-off"
+					:close-after-click="true"
+					:title="t('announcementcenter', 'Clear notifications')"
+					@click="onRemoveNotifications" />
+				<NcActionButton
+					icon="icon-delete"
+					:title="t('announcementcenter', 'Delete announcement')"
+					@click="onDeleteAnnouncement" />
+			</template>
+		</NcListItem>
 	</div>
 </template>
 
 <script>
 import Delete from "vue-material-design-icons/Delete";
-import NcActions from "@nextcloud/vue/dist/Components/NcActions.js";
-import NcActionButton from "@nextcloud/vue/dist/Components/NcActionButton.js";
-import NcAvatar from "@nextcloud/vue/dist/Components/NcAvatar.js";
-import NcButton from "@nextcloud/vue/dist/Components/NcButton.js";
-import NcRichText from "@nextcloud/vue/dist/Components/NcRichText.js";
+import {
+	NcActions,
+	NcActionButton,
+	NcAvatar,
+	NcButton,
+	NcRichText,
+	NcListItem,
+} from "@nextcloud/vue";
 import moment from "@nextcloud/moment";
 import { showError } from "@nextcloud/dialogs";
 import {
 	deleteAnnouncement,
 	removeNotifications,
 } from "../services/announcementsService.js";
+
 import { mapGetters, mapMutations } from "vuex";
 import { emit } from "@nextcloud/event-bus";
 export default {
@@ -126,6 +84,7 @@ export default {
 		NcButton,
 		NcRichText,
 		Delete,
+		NcListItem,
 	},
 	props: {
 		source: {
@@ -172,12 +131,13 @@ export default {
 			return moment(this.timestamp).fromNow();
 		},
 		commentsCount() {
-			return n(
-				"announcementcenter",
-				"%n comment",
-				"%n comments",
-				this.source.comments
-			);
+			return this.source.comments;
+			// return n(
+			// 	"announcementcenter",
+			// 	"%n comment",
+			// 	"%n comments",
+			// 	this.source.comments
+			// );
 		},
 	},
 
@@ -232,6 +192,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+li {
+	list-style-type: none;
+}
+
 .selected_announcement {
 	border-left: 0.3rem solid var(--color-primary);
 	background: var(--color-background-hover);

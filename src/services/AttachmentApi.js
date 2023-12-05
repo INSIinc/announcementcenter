@@ -33,7 +33,7 @@ export class AttachmentApi {
 			method: "GET",
 			url: this.url(`announcements/${announcementId}/attachments`),
 		});
-		console.log(response);
+	
 		return response.data.ocs.data;
 	}
 

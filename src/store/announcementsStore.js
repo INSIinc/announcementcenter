@@ -137,7 +137,6 @@ const actions = {
 	},
 	async loadAnnouncements(context, { filterKey, page, pageSize }) {
 		const response = await searchAnnouncements(filterKey, page, pageSize);
-		console.log(response);
 		context.commit("setTotal", response.data?.ocs?.data.total);
 		context.commit("setPages", response.data?.ocs?.data.pages);
 		let announcements = response.data?.ocs?.data.data || [];
@@ -153,7 +152,7 @@ const actions = {
 		pageSize = 14
 	) {
 		const response = await searchAnnouncements(filterKey, page, pageSize);
-		console.log(response);
+
 		context.commit("setSearchTotal", response.data?.ocs?.data.total);
 		let announcements = response.data?.ocs?.data.data || [];
 		announcements = announcements.sort((a1, a2) => {

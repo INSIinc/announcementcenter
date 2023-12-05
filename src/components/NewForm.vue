@@ -21,6 +21,9 @@
   -->
 <template>
 	<div class="announcement__form">
+		<div class="text-xl font-bold flex justify-center items-center p-1">
+			{{ t("announcementcenter", "post announcement") }}
+		</div>
 		<input
 			v-model="subject"
 			class="announcement__form__subject"
@@ -702,8 +705,7 @@ export default {
 }
 .announcement__form {
 	max-width: 800px;
-	padding: 0px 20px;
-	margin: 70px auto 35px;
+	padding: 20px;
 	font-size: 15px;
 	&__user {
 		width: 100%;

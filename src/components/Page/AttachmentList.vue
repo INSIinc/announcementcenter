@@ -141,7 +141,6 @@
 </template>
 
 <script>
-import axios from "@nextcloud/axios";
 import { NcActions, NcActionButton, NcActionLink } from "@nextcloud/vue";
 import AttachmentDragAndDrop from "../AttachmentDragAndDrop.vue";
 import relativeDate from "../../mixins/relativeDate.js";
@@ -263,7 +262,6 @@ export default {
 			immediate: true,
 			handler() {
 				this.fetchAttachments(this.announcementId);
-				console.log(this.announcementId);
 			},
 		},
 	},
@@ -337,7 +335,6 @@ export default {
 		text-align: left;
 	}
 }
-
 .attachment-list {
 	&.selector {
 		padding: 10px;

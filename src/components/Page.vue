@@ -140,7 +140,7 @@
 			v-if="modalShow"
 			:title="t('announcementcenter', 'Choose attachment')"
 			@close="modalShow = false">
-			<div class="modal__content p-2">
+			<div class="modal__content p-2" style="width: 90%">
 				<div
 					class="text-xl font-bold flex justify-center items-center p-1">
 					{{ t("announcementcenter", "Choose attachment") }}
@@ -183,7 +183,6 @@ import AttachmentIcon from "./icons/AttachmentIcon.vue";
 import DownloadIcon from "./icons/DownloadIcon.vue";
 export default {
 	name: "Page",
-
 	components: {
 		EditButton,
 		NcActionButton,
@@ -232,6 +231,7 @@ export default {
 				if (!attachment) {
 					return {};
 				}
+				console.log(attachment);
 				const url = attachment.extendedData.hasPreview
 					? this.attachmentPreview16(attachment)
 					: OC.MimeType.getIconUrl(attachment.extendedData.mimetype);

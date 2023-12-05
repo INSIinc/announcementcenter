@@ -110,7 +110,6 @@ export default {
 	},
 	async beforeMount() {
 		await this.loadAnnouncements({ filterKey: "", page: 1, pageSize: 30 });
-		console.log(this.announcements);
 	},
 	async mounted() {
 		const activeId = loadState("announcementcenter", "activeId", 0);

@@ -21,6 +21,14 @@
   -->
 <template>
 	<NcAppContentList ref="contentList" style="height: 100%">
+		<NcAppNavigationNew
+			v-if="isAdmin || canCreate"
+			:text="t('announcementcenter', 'post announcement')"
+			@click="addAnnouncement">
+			<template #icon>
+				<PlusIcon :size="20" />
+			</template>
+		</NcAppNavigationNew>
 		<div class="page-list-headerbar p-2">
 			<NcTextField
 				name="pageFilter"
@@ -31,20 +39,10 @@
 					t('announcementcenter', 'Search Announcements')
 				" />
 			<NcButton
-				class="ml-2"
-				:title="t('announcementcenter', 'post announcement')"
-				v-if="isAdmin || canCreate"
-				type="primary"
-				@click="addAnnouncement">
-				<template #icon>
-					<PlusIcon :size="20" />
-				</template>
-			</NcButton>
-			<NcButton
+				v-if="!synced"
 				class="ml-2"
 				:title="t('announcementcenter', 'load more announcements')"
-				v-if="isAdmin || canCreate"
-				type="success"
+				type="primary"
 				@click="onScrollToBottom">
 				<template #icon>
 					<SyncIcon :size="20" />
@@ -54,17 +52,21 @@
 		<div style="height: calc(100% - 60px)">
 			<div v-for="time in Object.keys(groupedAnnouncements)">
 				<template v-if="groupedAnnouncements[time].length > 0">
-					<div
-						@click="toggleCollapse(time)"
-						class="time-stage flex items-center text-sm font-bold p-1 hover:cursor-pointer">
-						<RightArrowIcon
-							:class="{ rotate90: collapseShow[time] }"
-							:size="20"></RightArrowIcon>
-						{{ time }}
-					</div>
-
-					<collapse-transition>
-						<div v-show="collapseShow[time]">
+					<NcAppNavigationItem
+						:loading="isLoading"
+						:name="time"
+						:allowCollapse="true"
+						:open="collapseShow[time]">
+						<template #icon>
+							<Calendar :size="20" />
+						</template>
+						<template #counter>
+							<NcCounterBubble>
+								{{ groupedAnnouncements[time].length }}
+							</NcCounterBubble>
+						</template>
+						<template #actions> </template>
+						<template>
 							<VirtualList
 								class="virtual-list"
 								wrap-class="list-wrap"
@@ -74,11 +76,10 @@
 								:data-component="AnnouncementComponent"
 								:page-mode="true">
 							</VirtualList>
-						</div>
-					</collapse-transition>
+						</template>
+					</NcAppNavigationItem>
 				</template>
 			</div>
-
 			<div v-if="isLoading">
 				<NcLoadingIcon />
 			</div>
@@ -95,11 +96,15 @@ import {
 	NcButton,
 	NcTextField,
 	NcLoadingIcon,
+	NcAppNavigationItem,
+	NcCounterBubble,
+	NcAppNavigationNew,
 } from "@nextcloud/vue";
 import CloseIcon from "vue-material-design-icons/Close.vue";
 import SortAlphabeticalAscendingIcon from "vue-material-design-icons/SortAlphabeticalAscending.vue";
 import SortAscendingIcon from "vue-material-design-icons/SortAscending.vue";
 import PlusIcon from "./icons/PlusIcon.vue";
+import Calendar from "vue-material-design-icons/Calendar.vue";
 import SyncIcon from "./icons/SyncIcon.vue";
 import RightArrowIcon from "./icons/RightArrowIcon.vue";
 import SortClockAscendingOutlineIcon from "vue-material-design-icons/SortClockAscendingOutline.vue";
@@ -108,7 +113,6 @@ import { loadState } from "@nextcloud/initial-state";
 import { emit, subscribe, unsubscribe } from "@nextcloud/event-bus";
 import VirtualList from "vue-virtual-scroll-list";
 import { CollapseTransition } from "@ivanv/vue-collapse-transition";
-import Vue from "vue";
 import TimeClassify from "../mixins/timeClassify";
 export default {
 	name: "AnnouncementList",
@@ -130,6 +134,10 @@ export default {
 		CollapseTransition,
 		RightArrowIcon,
 		SyncIcon,
+		NcAppNavigationItem,
+		Calendar,
+		NcCounterBubble,
+		NcAppNavigationNew,
 	},
 	mixins: [TimeClassify],
 	data() {
@@ -147,7 +155,7 @@ export default {
 		for (let key of Object.values(this.timeClassify)) {
 			this.$set(this.collapseShow, key, false);
 		}
-		console.log(this.collapseShow);
+
 		this.$refs.contentList.$el.addEventListener(
 			"scroll",
 			this.handleScroll
@@ -187,7 +195,6 @@ export default {
 			return res;
 		},
 		groupedAnnouncements() {
-			console.log(this.sortAnnouncements);
 			// 定义一个空对象，用于存储分组结果
 			let result = {};
 			// 定义一个数组，用于存储分组的键
@@ -196,8 +203,6 @@ export default {
 			for (let key of Object.values(this.timeClassify)) {
 				result[key] = [];
 			}
-			// 获取当前时间的moment对象
-			let now = moment(new Date());
 			// 遍历announcements数组，根据时间戳判断属于哪个分组，并添加到相应的数组中
 			for (let announcement of this.sortAnnouncements) {
 				// 获取announcement的时间的moment对象
@@ -291,6 +296,12 @@ export default {
 			// 返回分组结果对象
 			return result;
 		},
+		synced() {
+			return (
+				this.announcements.length >= this.total ||
+				this.page > this.pages
+			);
+		},
 	},
 	watch: {
 		async filterString(oldValue, newValue) {
@@ -345,8 +356,9 @@ export default {
 				this.announcements.length >= this.total ||
 				this.page > this.pages ||
 				this.isLoading
-			)
+			) {
 				return;
+			}
 
 			this.isLoading = true;
 			this.page += 1;
